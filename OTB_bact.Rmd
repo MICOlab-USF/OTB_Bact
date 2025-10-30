@@ -1,0 +1,66 @@
+---
+title: "Untitled"
+author: "Maggi Brisbin"
+date: "2025-10-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+import packages and functions
+```{r packages, warning=FALSE}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(stringr)
+library(purrr)
+"%ni%" <- Negate("%in%")
+library(googlesheets4)
+library(patchwork)
+library(broom)
+library(flextable)
+library(kableExtra)
+library(growthrates)
+```
+
+
+```{r}
+data_headers<- c("Sample", "X.Parameter", "Y.Parameter", "Concentration", "Date", "X.Mean", "Y.Mean", "X.SD", "Y.SD")
+
+directory = "OTB_Sampling_2025"
+
+bact_counts_func <- function(data_headers, directory) { 
+  # make empty dataframe 
+  HWdf = data.frame(matrix(
+  vector(), 0, length(data_headers), dimnames=list(c(), data_headers)),
+                stringsAsFactors=F)
+  
+  # import bacterial count data
+  for (i in system(paste0("ls ", directory  ,"/"), intern = TRUE)) {
+    df<- read.csv(paste0(directory,"/",i))
+    date <- str_split_i(i, "_", 3)
+    date2<- str_extract(date, '.*(?=\\.csv$)')
+    df$Date <- date2
+    HWdf <- rbind(HWdf, df)
+    }
+
+  HWdf$Date <- ymd(HWdf$Date)
+  return(HWdf)
+}
+
+bactcounts<- bact_counts_func(data_headers, directory)
+```
+
+
+```{r}
+bactcounts <- bactcounts %>% separate(Sample, into = c("station", "rep", "mix"), sep = "_") %>% 
+  mutate(rep = case_when(rep %in% c(1,2,3) ~ rep, rep %ni% c(1,2,3) ~ mix)  ) %>%  select(!mix)
+
+
+
+```
+

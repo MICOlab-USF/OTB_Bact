@@ -24,6 +24,7 @@ library(broom)
 library(flextable)
 library(kableExtra)
 library(growthrates)
+library(readr)
 ```
 
 
@@ -63,19 +64,85 @@ bactcounts <- bactcounts %>% separate(Sample, into = c("station", "rep", "mix"),
 bactcounts<-read.csv("C:/Users/lilia/OneDrive/Desktop/OTB_Bact/OTB_Sampling_2025/OTB_BACT_20250508.csv")
 head(bactcounts)
 ```
+## 05/08/2025 R2
 ```{r}
-ggplot(bactcounts, aes(x = Station, y = Concentration)) +
+bact_R2 <- bactcounts %>%
+  filter(Gate == "R2") %>%
+  mutate(Station = str_extract(Sample, "St\\d+"))
+
+bact_summary <- bact_R2 %>%
+  group_by(Station) %>%
+  summarise(
+    Mean_Conc = mean(Concentration, na.rm = TRUE),
+    SD_Conc   = sd(Concentration, na.rm = TRUE)
+  )
+
+
+bact_summary <- bact_summary %>%
+  filter(!is.na(Station)) %>%
+  mutate(Station = factor(Station, levels = paste0("St", 1:10)))
+
+
+ggplot(bact_summary, aes(x = Station, y = Mean_Conc)) +
   geom_point(size = 3, color = "darkblue") +
-  geom_line(group = 1, color = "skyblue") +
-  theme_minimal() +
+  geom_line(aes(group = 1), color = "skyblue") +
+  geom_errorbar(aes(ymin = Mean_Conc - SD_Conc,
+                    ymax = Mean_Conc + SD_Conc),
+                width = 0.2, color = "gray40") +
+  theme_test() +
   labs(
-    title = "Bacterial Cell Concentration by Station",
+    title = "Bacterial Concentration (Gate R2) by Station",
     x = "Station",
-    y = "Bacterial Concentration (cells/mL)"
+    y = "Mean Concentration (cells/μL)"
   )
 
 ```
 
+```{r}
+data_dir <- "C:/Users/lilia/OneDrive/Desktop/OTB_Bact/OTB_Sampling_2025"
+files <- list.files(data_dir, pattern = "OTB_BACT_.*\\.csv$", full.names = TRUE)
+read_and_clean <- function(file) {
+  df <- read_csv(file)
+  
+
+  date_str <- str_extract(basename(file), "\\d{8}")
+  df$Date <- lubridate::ymd(date_str)
+  
+  df %>%
+    filter(Gate == "R2") %>%
+    mutate(Station = str_extract(Sample, "St\\d+")) %>%
+    filter(!is.na(Station)) %>%
+    group_by(Date, Station) %>%
+    summarise(
+      Mean_Conc = mean(Concentration, na.rm = TRUE),
+      SD_Conc   = sd(Concentration, na.rm = TRUE),
+      .groups = "drop"
+    )
+}
+
+bact_all <- map_dfr(files, read_and_clean)
+```
+```{r}
+bact_all <- bact_all %>%
+  mutate(
+    Station = factor(Station, levels = paste0("St", 1:10)),
+    Date = as.factor(Date)
+  )
+ggplot(bact_all, aes(x = Station, y = Mean_Conc)) +
+  geom_point(size = 2, color = "darkblue") +
+  geom_line(aes(group = 1), color = "skyblue") +
+  geom_errorbar(aes(ymin = Mean_Conc - SD_Conc,
+                    ymax = Mean_Conc + SD_Conc),
+                width = 0.2, color = "gray40") +
+  theme_test(base_size = 10) +
+  labs(
+    title = "Bacterial Concentration (Gate R2) Across Sampling Dates",
+    x = "Station",
+    y = "Mean Concentration (cells/μL)"
+  ) +
+  facet_wrap(~ Date, ncol = 4)  
+
+```
 
 
 

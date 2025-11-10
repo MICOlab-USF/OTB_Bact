@@ -109,7 +109,7 @@ read_and_clean <- function(file) {
   df$Date <- lubridate::ymd(date_str)
   
   df %>%
-    filter(Gate == "R2") %>%
+    filter(Gate == "R3") %>%
     mutate(Station = str_extract(Sample, "St\\d+")) %>%
     filter(!is.na(Station)) %>%
     group_by(Date, Station) %>%
@@ -130,7 +130,7 @@ bact_all <- bact_all %>%
   )
 ggplot(bact_all, aes(x = Station, y = Mean_Conc)) +
   geom_point(size = 2, color = "darkblue") +
-  geom_line(aes(group = 1), color = "skyblue") +
+  #geom_line(aes(group = 1), color = "skyblue") +
   geom_errorbar(aes(ymin = Mean_Conc - SD_Conc,
                     ymax = Mean_Conc + SD_Conc),
                 width = 0.2, color = "gray40") +
@@ -144,5 +144,19 @@ ggplot(bact_all, aes(x = Station, y = Mean_Conc)) +
 
 ```
 
+color = station
+y= conc
+x = time 
 
+
+plot stations on map 
+ggspatial
+rnaturalearth
+rnaturalearthdata
+sf
+ggOceanMaps
+scatterpie
+
+
+bioconductor 
 

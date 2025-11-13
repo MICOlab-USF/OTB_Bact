@@ -25,6 +25,7 @@ library(flextable)
 library(kableExtra)
 library(growthrates)
 library(readr)
+library(ggspatial)
 ```
 
 
@@ -64,10 +65,10 @@ bactcounts <- bactcounts %>% separate(Sample, into = c("station", "rep", "mix"),
 bactcounts<-read.csv("C:/Users/lilia/OneDrive/Desktop/OTB_Bact/OTB_Sampling_2025/OTB_BACT_20250508.csv")
 head(bactcounts)
 ```
-## 05/08/2025 R2
+## 05/08/2025 R3
 ```{r}
 bact_R2 <- bactcounts %>%
-  filter(Gate == "R2") %>%
+  filter(Gate == "R3") %>%
   mutate(Station = str_extract(Sample, "St\\d+"))
 
 bact_summary <- bact_R2 %>%
@@ -85,19 +86,18 @@ bact_summary <- bact_summary %>%
 
 ggplot(bact_summary, aes(x = Station, y = Mean_Conc)) +
   geom_point(size = 3, color = "darkblue") +
-  geom_line(aes(group = 1), color = "skyblue") +
   geom_errorbar(aes(ymin = Mean_Conc - SD_Conc,
                     ymax = Mean_Conc + SD_Conc),
                 width = 0.2, color = "gray40") +
   theme_test() +
   labs(
-    title = "Bacterial Concentration (Gate R2) by Station",
+    title = "Bacterial Concentration (Gate R3) by Station",
     x = "Station",
     y = "Mean Concentration (cells/μL)"
   )
 
 ```
-
+## All dates
 ```{r}
 data_dir <- "C:/Users/lilia/OneDrive/Desktop/OTB_Bact/OTB_Sampling_2025"
 files <- list.files(data_dir, pattern = "OTB_BACT_.*\\.csv$", full.names = TRUE)
@@ -159,4 +159,67 @@ scatterpie
 
 
 bioconductor 
+## Station by color
+```{r}
+ggplot(bact_all, aes(x = Date, y = Mean_Conc, color = Station)) +
+  geom_point(size = 2) +
+  geom_line(aes(group = Station), linewidth = 0.6, alpha = 0.7) +
+  geom_errorbar(aes(ymin = Mean_Conc - SD_Conc,
+                    ymax = Mean_Conc + SD_Conc),
+                width = 0.1, alpha = 0.6) +
+  theme_test(base_size = 10) +
+  labs(
+    title = "Bacterial Concentration (Gate R3) Over Time by Station",
+    x = "Sampling Date",
+    y = "Mean Concentration (cells/μL)",
+    color = "Station"
+  ) +
+   scale_color_viridis_d(option = "turbo") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+bact_all %>% drop_na(Mean_Conc, SD_Conc)
+
+```
+
+## Base Map
+```{r}
+coords <- read_sheet("https://docs.google.com/spreadsheets/d/1uMg7J9nv4E8PAOlW-msOi2YNinEexmcY7h_dJc_-OuE/edit?usp=sharing")
+
+bact_geo <- bact_all %>%
+  left_join(coords, by = "Station")
+station_levels <- paste0("St", 1:10)
+coords <- coords %>%
+  mutate(Station = factor(Station, levels = station_levels))
+bact_geo <- bact_geo %>%
+  mutate(Station = factor(Station, levels = station_levels))
+```
+
+
+```{r}
+# OTB map limits
+limits <- c(lon_min = -82.8, lon_max = -82.5, lat_min = 27.6, lat_max = 28.1)
+
+basemap(limits = limits) +
+  geom_point(data = coords,
+             aes(x = Long, y = Lat, color = Station),
+             size = 3) +
+  scale_color_viridis_d(option = "turbo") +
+  labs(title = "OTB Sampling Stations",
+       x = "Longitude", y = "Latitude", color = "Station")
+
+
+```
+```{r}
+basemap(limits = limits) +
+  geom_point(data = bact_geo,
+             aes(x = Long, y = Lat, color = Station, size = Mean_Conc),
+             alpha = 0.8) +
+  scale_color_viridis_d(option = "turbo") +
+  scale_size_continuous(name = "Mean Concentration (cells/μL)") +
+  labs(title = "Bacterial Concentration at OTB Stations",
+       x = "Longitude", y = "Latitude")
+
+```
+
 

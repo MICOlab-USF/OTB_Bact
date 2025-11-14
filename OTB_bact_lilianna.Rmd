@@ -136,13 +136,14 @@ ggplot(bact_all, aes(x = Station, y = Mean_Conc)) +
                 width = 0.2, color = "gray40") +
   theme_test(base_size = 10) +
   labs(
-    title = "Bacterial Concentration (Gate R2) Across Sampling Dates",
+    title = "Bacterial Concentration (Gate R3) Across Sampling Dates",
     x = "Station",
     y = "Mean Concentration (cells/μL)"
   ) +
   facet_wrap(~ Date, ncol = 4)  
 
 ```
+ggsave("OTB_Bact.jpg", width = 7, height = 4)
 
 color = station
 y= conc

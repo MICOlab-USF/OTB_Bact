@@ -185,6 +185,7 @@ bact_all %>% drop_na(Mean_Conc, SD_Conc)
 
 ## Base Map
 ```{r}
+library(ggOceanMaps)
 coords <- read_sheet("https://docs.google.com/spreadsheets/d/1uMg7J9nv4E8PAOlW-msOi2YNinEexmcY7h_dJc_-OuE/edit?usp=sharing")
 
 bact_geo <- bact_all %>%
@@ -211,6 +212,7 @@ basemap(limits = limits) +
 
 
 ```
+## Dot size by conc.
 ```{r}
 basemap(limits = limits) +
   geom_point(data = bact_geo,

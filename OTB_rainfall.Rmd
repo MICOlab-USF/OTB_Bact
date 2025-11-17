@@ -1,0 +1,73 @@
+---
+title: "OTB_rainfall"
+author: "Lilianna"
+date: "2025-11-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 
+```{r}
+library(readxl)
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+
+# read Excel file
+df <- read_excel("/Users/lilia/Downloads/OTB_Rainfall_Data.xlsx")
+
+# clean ResultValue and parse datetime
+df <- df %>%
+  mutate(
+    # clean numeric value (Excel stored it as text)
+    ResultValue = as.numeric(gsub("[^0-9\\.]", "", ResultValue)),
+    
+    # parse combined date-time string
+    SampleDate_Date = mdy_hms(SampleDate_Date)
+  )
+
+# filter down to only rainfall + date within date window
+df_sub <- df %>%
+  filter(Characteristic == "Daily Cumulative Rainfall") %>%
+  filter(SampleDate_Date >= ymd("2025-05-01"),
+         SampleDate_Date <= ymd("2025-10-31"))
+
+# incremental rainfall from cumulative
+df_sub <- df_sub %>%
+  arrange(SampleDate_Date) %>%
+  mutate(
+    Rain_increment = ResultValue - lag(ResultValue),
+    Rain_increment = ifelse(Rain_increment < 0, NA, Rain_increment)
+  )
+
+# weekly averages
+weekly_avg <- df_sub %>%
+  mutate(Week = floor_date(SampleDate_Date, "week")) %>%
+  group_by(Week) %>%
+  summarise(Weekly_avg_rain = mean(Rain_increment, na.rm = TRUE))
+
+
+
+```
+
+```{r}
+weekly_avg <- weekly_avg %>%
+  mutate(Week = as.Date(Week))
+
+ggplot(weekly_avg, aes(x = Week, y = Weekly_avg_rain)) +
+  geom_line(size = 1, color = "#1f77b4") +
+  geom_point(size = 2, color = "#318") +
+  scale_x_date(date_breaks = "1 week", date_labels = "%m/%d") +
+  labs(
+    title = "Weekly Average Rainfall",
+    x = "Week",
+    y = "Average Rainfall (inches)"
+  ) +
+  theme_test() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+

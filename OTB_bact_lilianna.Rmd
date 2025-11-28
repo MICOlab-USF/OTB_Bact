@@ -182,7 +182,7 @@ ggplot(bact_all, aes(x = Date, y = Mean_Conc, color = Station)) +
 bact_all %>% drop_na(Mean_Conc, SD_Conc)
 
 ```
-
+ggsave("OTB_conc_overtime_by_station.jpg", width = 11, height = 8)
 ## Base Map
 ```{r}
 library(ggOceanMaps)
@@ -224,5 +224,5 @@ basemap(limits = limits) +
        x = "Longitude", y = "Latitude")
 
 ```
-
+ggsave("OTB_conc_by_station.jpg", width = 11, height = 8)
 

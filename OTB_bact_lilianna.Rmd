@@ -212,17 +212,33 @@ basemap(limits = limits) +
 
 
 ```
-## Dot size by conc.
+## Heat Map
 ```{r}
 basemap(limits = limits) +
-  geom_point(data = bact_geo,
-             aes(x = Long, y = Lat, color = Station, size = Mean_Conc),
-             alpha = 0.8) +
-  scale_color_viridis_d(option = "turbo") +
-  scale_size_continuous(name = "Mean Concentration (cells/μL)") +
-  labs(title = "Bacterial Concentration at OTB Stations",
-       x = "Longitude", y = "Latitude")
+  geom_point(
+    data = bact_geo,
+    aes(x = Long, y = Lat, color = Mean_Conc),
+    size = 4,
+    alpha = 0.9
+  ) +
+  geom_text(
+    data = bact_geo,
+    aes(x = Long, y = Lat, label = Station),
+    color = "black",      # text color
+    size = 3,             # adjust size as needed
+    vjust = -1            # moves text slightly above the point
+  ) +
+  scale_color_viridis_c(
+    option = "magma",
+    name = "Mean Concentration (cells/μL)"
+  ) +
+  labs(
+    title = "Bacterial Concentration at OTB Stations",
+    x = "Longitude",
+    y = "Latitude"
+  )
+
 
 ```
-ggsave("OTB_conc_by_station.jpg", width = 11, height = 8)
+ggsave("OTB_conc_by_station_heatmap.jpg", width = 11, height = 8)
 

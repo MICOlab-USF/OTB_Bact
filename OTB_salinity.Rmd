@@ -1,0 +1,37 @@
+---
+title: "OTB_salinity"
+author: "Lilianna"
+date: "2025-12-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+import packages and functions
+```{r packages, warning=FALSE}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(stringr)
+library(purrr)
+"%ni%" <- Negate("%in%")
+library(googlesheets4)
+library(patchwork)
+library(broom)
+library(flextable)
+library(kableExtra)
+library(growthrates)
+library(readr)
+library(ggspatial)
+library(ggOceanMaps)
+library(readxl)
+```
+
+```{r}
+df <- read_excel("/Users/lilia/Downloads/TB_Phyto _20250508_1014.xlsx")
+```
+

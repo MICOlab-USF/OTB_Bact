@@ -72,7 +72,7 @@ ggplot(weekly_avg, aes(x = Week, y = Weekly_avg_rain)) +
 ```
 ggsave("OTB_rainfall.jpg", width = 9, height = 8)
 
-## Daily Cumulative
+## Cumul. 05-11
 
 ```{r}
 # daily rainfall totals
@@ -105,3 +105,66 @@ ggplot(daily_cum, aes(x = Date, y = Daily_Cumulative_Rain_mm)) +
 
 ```
 ggsave("OTB_rainfall_12/13.jpg", width = 9, height = 8)
+
+## Cumul. 04-11
+```{r}
+# daily rainfall totals
+# filter to daily cumulative rainfall and date window
+daily_cum <- df %>%
+  filter(Characteristic == "Daily Cumulative Rainfall") %>%
+  filter(SampleDate_Date >= ymd("2025-04-01"),
+         SampleDate_Date <= ymd("2025-11-30")) %>%
+  mutate(Date = as.Date(SampleDate_Date))
+
+daily_cum <- daily_cum %>%
+  group_by(Date) %>%
+  summarise(Daily_Cumulative_Rain = max(ResultValue, na.rm = TRUE)) %>%
+  ungroup()
+daily_cum <- daily_cum %>%
+  mutate(Daily_Cumulative_Rain_mm = Daily_Cumulative_Rain * 25.4)
+
+ggplot(daily_cum, aes(x = Date, y = Daily_Cumulative_Rain_mm)) +
+  geom_col(fill = "#1f77b4") +
+  scale_x_date(date_breaks = "1 week", date_labels = "%m/%d") +
+  labs(
+    title = "Daily Cumulative OTB Rainfall (April–November 2025)",
+    x = "Date",
+    y = "Daily Cumulative Rainfall (mm)"
+  ) +
+  theme_test() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+ggsave("OTB_rainfall_april.jpg", width = 9, height = 8)
+
+## Cumul. 03-11
+
+```{r}
+# daily rainfall totals
+# filter to daily cumulative rainfall and date window
+daily_cum <- df %>%
+  filter(Characteristic == "Daily Cumulative Rainfall") %>%
+  filter(SampleDate_Date >= ymd("2025-03-01"),
+         SampleDate_Date <= ymd("2025-11-30")) %>%
+  mutate(Date = as.Date(SampleDate_Date))
+
+daily_cum <- daily_cum %>%
+  group_by(Date) %>%
+  summarise(Daily_Cumulative_Rain = max(ResultValue, na.rm = TRUE)) %>%
+  ungroup()
+daily_cum <- daily_cum %>%
+  mutate(Daily_Cumulative_Rain_mm = Daily_Cumulative_Rain * 25.4)
+
+ggplot(daily_cum, aes(x = Date, y = Daily_Cumulative_Rain_mm)) +
+  geom_col(fill = "#1f77b4") +
+  scale_x_date(date_breaks = "1 week", date_labels = "%m/%d") +
+  labs(
+    title = "Daily Cumulative OTB Rainfall (March–November 2025)",
+    x = "Date",
+    y = "Daily Cumulative Rainfall (mm)"
+  ) +
+  theme_test() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+ggsave("OTB_rainfall_march.jpg", width = 9, height = 8)

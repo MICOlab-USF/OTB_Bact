@@ -35,3 +35,27 @@ library(readxl)
 df <- read_excel("/Users/lilia/Downloads/TB_Phyto _20250508_1014.xlsx")
 ```
 
+```{r}
+library(ggOceanMaps)
+coords <- read_sheet("https://docs.google.com/spreadsheets/d/1uMg7J9nv4E8PAOlW-msOi2YNinEexmcY7h_dJc_-OuE/edit?usp=sharing")
+
+bact_geo <- bact_all %>%
+  left_join(coords, by = "Station")
+station_levels <- paste0("St", 1:10)
+coords <- coords %>%
+  mutate(Station = factor(Station, levels = station_levels))
+bact_geo <- bact_geo %>%
+  mutate(Station = factor(Station, levels = station_levels))
+# OTB map limits
+limits <- c(lon_min = -82.8, lon_max = -82.5, lat_min = 27.6, lat_max = 28.1)
+
+basemap(limits = limits) +
+  geom_point(data = coords,
+             aes(x = Long, y = Lat, color = Station),
+             size = 3) +
+  scale_color_viridis_d(option = "turbo") +
+  labs(title = "OTB Sampling Stations",
+       x = "Longitude", y = "Latitude", color = "Station")
+
+
+```

@@ -168,3 +168,80 @@ ggplot(daily_cum, aes(x = Date, y = Daily_Cumulative_Rain_mm)) +
 
 ```
 ggsave("OTB_rainfall_march.jpg", width = 9, height = 8)
+
+
+```{r}
+sample_dates <- tibble(
+  SampleDate = as.Date(c(
+    "2025-05-08",
+    "2025-06-19",
+    "2025-07-31",
+    "2025-09-25",
+    "2025-10-14"
+  ))
+)
+daily_rain <- daily_cum %>%
+  arrange(Date) %>%
+  mutate(Daily_Rain_mm = Daily_Cumulative_Rain_mm -
+                           lag(Daily_Cumulative_Rain_mm)) %>%
+  mutate(Daily_Rain_mm = ifelse(Daily_Rain_mm < 0, NA, Daily_Rain_mm))
+rain_summary <- sample_dates %>%
+  rowwise() %>%
+  mutate(
+    Rain_24h_before_mm = sum(
+      daily_rain$Daily_Rain_mm[
+        daily_rain$Date < SampleDate &
+        daily_rain$Date >= SampleDate - days(1)
+      ],
+      na.rm = TRUE
+    ),
+
+    Rain_48h_before_mm = sum(
+      daily_rain$Daily_Rain_mm[
+        daily_rain$Date < SampleDate &
+        daily_rain$Date >= SampleDate - days(2)
+      ],
+      na.rm = TRUE
+    ),
+
+    Rain_7d_before_mm = sum(
+      daily_rain$Daily_Rain_mm[
+        daily_rain$Date < SampleDate &
+        daily_rain$Date >= SampleDate - days(7)
+      ],
+      na.rm = TRUE
+    )
+  ) %>%
+  ungroup()
+df <- sample_dates %>%
+  rowwise() %>%
+  mutate(
+    Rain_24h_before_mm = sum(
+      daily_rain$Daily_Rain_mm[
+        daily_rain$Date < SampleDate &
+        daily_rain$Date >= SampleDate - days(1)
+      ],
+      na.rm = TRUE
+    ),
+
+    Rain_48h_before_mm = sum(
+      daily_rain$Daily_Rain_mm[
+        daily_rain$Date < SampleDate &
+        daily_rain$Date >= SampleDate - days(2)
+      ],
+      na.rm = TRUE
+    ),
+
+    Rain_7d_before_mm = sum(
+      daily_rain$Daily_Rain_mm[
+        daily_rain$Date < SampleDate &
+        daily_rain$Date >= SampleDate - days(7)
+      ],
+      na.rm = TRUE
+    )
+  ) %>%
+  ungroup()
+
+df
+```
+

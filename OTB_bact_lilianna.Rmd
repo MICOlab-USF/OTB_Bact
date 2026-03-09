@@ -242,3 +242,68 @@ basemap(limits = limits) +
 ```
 ggsave("OTB_conc_by_station_heatmap.jpg", width = 11, height = 8)
 
+## Phyto cell counts
+
+```{r}
+library(dplyr)
+library(lubridate)
+library(janitor)
+```
+
+```{r}
+
+phyto <-read.csv("C:/Users/lilia/OneDrive/Desktop/OTB_Bact/TBPhyto20250508-20251014.csv") %>%
+  clean_names()
+
+phyto <- phyto %>%
+  mutate(sample_date = dmy(sample_date))
+str(phyto$sample_date)
+
+phyto <- phyto %>%
+  mutate(
+    Station = paste0("St", stringr::str_extract(station_id, "\\d+"))
+  )
+
+
+```
+```{r}
+colnames(phyto)
+```
+
+```{r}
+phyto <- phyto %>%
+  select(sample_date, Station, taxa, abundance_cells_l)
+
+phyto <- phyto %>%
+  rename(
+    Date = sample_date,
+    Taxon = taxa,
+    Cells = abundance_cells_l
+  )
+
+phyto_rel <- phyto %>%
+  group_by(Date, Station) %>%
+  mutate(Rel_Abundance = Cells / sum(Cells)) %>%
+  ungroup()
+
+taxa_levels <- unique(phyto_rel$Taxon)
+
+my_colors <- colorRampPalette(RColorBrewer::brewer.pal(12, "Set3"))(length(taxa_levels))
+
+ggplot(phyto_rel,
+       aes(x = Station, y = Rel_Abundance, fill = Taxon)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~Date) +
+  labs(
+    title = "Relative Phytoplankton Abundance",
+    x = "Station",
+    y = "Relative Abundance (%)",
+    fill = "Taxa"
+  ) +
+   scale_fill_manual(values = setNames(my_colors, taxa_levels)) +
+  theme_test()
+
+
+```
+
+ggsave("phyto_rel_abund.jpg", width = 20, height = 8)

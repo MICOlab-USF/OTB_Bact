@@ -169,6 +169,20 @@ ggplot(daily_cum, aes(x = Date, y = Daily_Cumulative_Rain_mm)) +
 ```
 ggsave("OTB_rainfall_march.jpg", width = 9, height = 8)
 
+```{r}
+sample_dates <- tibble(
+  SampleDate = as.Date(c(
+    "2025-05-08",
+    "2025-06-19",
+    "2025-07-01",
+    "2025-07-18", 
+    "2025-07-31",
+    "2025-08-29",
+    "2025-09-25",
+    "2025-10-14"
+  ))
+)
+```
 
 ```{r}
 df <- sample_dates %>%
